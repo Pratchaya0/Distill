@@ -9,9 +9,13 @@ export class MicRecorder {
   private audioCtx: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
   private rafId: number | null = null;
+  private wakeLock: WakeLockSentinel | null = null;
 
   async start(): Promise<void> {
     this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if ('wakeLock' in navigator) {
+      this.wakeLock = await navigator.wakeLock.request('screen').catch(() => null);
+    }
 
     this.audioCtx = new AudioContext();
     const source = this.audioCtx.createMediaStreamSource(this.stream);
@@ -76,6 +80,8 @@ export class MicRecorder {
   }
 
   private cleanup(): void {
+    this.wakeLock?.release().catch(() => null);
+    this.wakeLock = null;
     this.stream?.getTracks().forEach((t) => t.stop());
     this.audioCtx?.close();
     this.stream = null;

@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Eye, EyeOff, Info, CheckCircle2 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { getApiKey, setApiKey, removeApiKey } from '@/lib/native/storage';
 
 interface EnvStatus {
   groqEnvSet: boolean;
@@ -25,14 +27,14 @@ function ApiKeyField({ label, storageKey, placeholder, helpUrl, envActive }: Api
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setValue(localStorage.getItem(storageKey) ?? '');
+    getApiKey(storageKey).then((v) => setValue(v ?? ''));
   }, [storageKey]);
 
-  const save = () => {
+  const save = async () => {
     if (value.trim()) {
-      localStorage.setItem(storageKey, value.trim());
+      await setApiKey(storageKey, value.trim());
     } else {
-      localStorage.removeItem(storageKey);
+      await removeApiKey(storageKey);
     }
     toast.success(`${label} saved.`);
   };
@@ -92,13 +94,15 @@ function ApiKeyField({ label, storageKey, placeholder, helpUrl, envActive }: Api
 // ── Page ─────────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const [envStatus, setEnvStatus] = useState<EnvStatus | null>(null);
+  const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
+    if (isNative) return; // no server in native build
     fetch('/api/env-status')
       .then((r) => r.json())
       .then(setEnvStatus)
       .catch(() => setEnvStatus({ groqEnvSet: false }));
-  }, []);
+  }, [isNative]);
 
   return (
     <div className="flex flex-col h-full">

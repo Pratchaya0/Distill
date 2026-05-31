@@ -9,8 +9,12 @@ export class ScreenRecorder {
   private audioCtx: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
   private rafId: number | null = null;
+  private wakeLock: WakeLockSentinel | null = null;
 
   async start(): Promise<void> {
+    if ('wakeLock' in navigator) {
+      this.wakeLock = await navigator.wakeLock.request('screen').catch(() => null);
+    }
     // Chrome requires video:true; we stop the video track immediately after
     const displayStream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
@@ -91,6 +95,8 @@ export class ScreenRecorder {
   }
 
   private cleanup(): void {
+    this.wakeLock?.release().catch(() => null);
+    this.wakeLock = null;
     this.stream?.getTracks().forEach((t) => t.stop());
     this.audioCtx?.close();
     this.stream = null;

@@ -11,10 +11,18 @@
     "release": "release-it",
     "release:patch": "release-it patch",
     "release:minor": "release-it minor",
-    "release:major": "release-it major"
+    "release:major": "release-it major",
+    "build:capacitor": "node scripts/build-capacitor.mjs",
+    "android:open": "npx cap open android",
+    "android:debug": "npx cap run android",
+    "android:release": "cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/preferences": "^8.0.1",
     "@tiptap/pm": "^3.24.0",
     "@tiptap/react": "^3.24.0",
     "@tiptap/starter-kit": "^3.24.0",
