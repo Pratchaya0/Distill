@@ -65,9 +65,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version from tag
+      - name: Extract version and lowercase owner
         id: meta
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Build and push container image
         uses: docker/build-push-action@v6
@@ -76,8 +78,8 @@ jobs:
           file: ./Containerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/distill:latest
-            ghcr.io/${{ github.repository_owner }}/distill:${{ steps.meta.outputs.version }}
+            ghcr.io/${{ steps.meta.outputs.owner }}/distill:latest
+            ghcr.io/${{ steps.meta.outputs.owner }}/distill:${{ steps.meta.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           labels: |
