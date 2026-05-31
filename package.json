@@ -15,7 +15,8 @@
     "build:capacitor": "node scripts/build-capacitor.mjs",
     "android:open": "npx cap open android",
     "android:debug": "npx cap run android",
-    "android:release": "cd android && ./gradlew assembleRelease"
+    "android:apk": "cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ANDROID_HOME=$HOME/Android/Sdk GRADLE_OPTS=-Dorg.gradle.java.home=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew assembleDebug",
+    "android:release": "cd android && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ANDROID_HOME=$HOME/Android/Sdk GRADLE_OPTS=-Dorg.gradle.java.home=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew assembleRelease"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

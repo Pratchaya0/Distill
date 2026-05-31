@@ -31,6 +31,14 @@ podman run -p 3000:3000 distill   # Run it
 # Or with podman-compose
 podman-compose up --build           # Build + start
 podman-compose down                 # Stop
+
+# Android APK (requires Android SDK at ~/Android/Sdk + openjdk-21-jdk)
+npm run build:capacitor   # static export → cap sync android
+npm run android:apk       # build debug APK → android/app/build/outputs/apk/debug/app-debug.apk
+npm run android:release   # build release APK (must be signed separately)
+npm run android:open      # open in Android Studio
+# Note: Gradle requires GRADLE_OPTS=-Dorg.gradle.java.home=/usr/lib/jvm/java-21-openjdk-amd64
+# This is baked into the android:apk and android:release scripts above.
 ```
 
 `next.config.ts` uses `output: 'standalone'` so the container copies only the minimal `.next/standalone` tree — no `node_modules` in the final image.
