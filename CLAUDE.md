@@ -15,6 +15,15 @@ npm run build      # Production build
 npm run lint       # ESLint
 npm run type-check # tsc --noEmit
 
+# Releases (run on main with a clean working dir)
+npm run release         # Interactive — prompts for version bump
+npm run release:patch   # 1.0.0 → 1.0.1  (bug fixes)
+npm run release:minor   # 1.0.0 → 1.1.0  (new features)
+npm run release:major   # 1.0.0 → 2.0.0  (breaking changes)
+# Requires GITHUB_TOKEN env var with repo + write:packages scopes.
+# Pushing the tag triggers .github/workflows/release.yml which builds
+# and pushes the GHCR image automatically.
+
 # Container (Podman) — production image
 podman build -t distill .         # Build image using Containerfile
 podman run -p 3000:3000 distill   # Run it
