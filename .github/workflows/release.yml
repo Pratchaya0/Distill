@@ -6,18 +6,54 @@ on:
       - 'v*'
 
 permissions:
-  contents: write   # create GitHub release
+  contents: write   # create GitHub release + upload assets
   packages: write   # push to GHCR
 
 jobs:
   release:
-    name: Build & publish
+    name: Build, publish & release
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ── Node / web build ────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Capacitor static export + Android sync ───────────────────────
+      - name: Build Capacitor static export
+        run: node scripts/build-capacitor.mjs
+        env:
+          GROQ_API_KEY: placeholder   # satisfies env-status check during build
+
+      # ── Java / Android ───────────────────────────────────────────────
+      - name: Setup Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+
+      - name: Rename APK
+        run: |
+          VERSION="${{ github.ref_name }}"
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             distill-${VERSION}-debug.apk
+
+      # ── Docker image → GHCR ─────────────────────────────────────────
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -32,7 +68,7 @@ jobs:
         id: meta
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push image
+      - name: Build and push container image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -47,3 +83,28 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+
+      # ── GitHub Release ───────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Distill ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            distill-${{ github.ref_name }}-debug.apk
+          body: |
+            ## 📱 Android APK
+
+            Download **`distill-${{ github.ref_name }}-debug.apk`** below and install it on your Android phone.
+
+            > **Install steps:** Download the APK → open it on your phone → tap Install.
+            > You may need to enable *Install from unknown sources* in Android settings.
+
+            ## 🐳 Docker image
+
+            ```bash
+            docker pull ghcr.io/pratchaya0/distill:${{ steps.meta.outputs.version }}
+            ```
+
+            ---
+            *Full changelog below ↓*

@@ -7,7 +7,7 @@ All notable changes to Distill are documented here.
 ### ✨ Features
 
 - MediaRecorder mic capture with live scrolling waveform visualiser
-- Screen/tab audio capture via `getDisplayMedia`
+- Screen/tab audio capture via `getDisplayMedia` (web only)
 - Groq API pipeline: Whisper-large-v3 transcription + Llama 3.3-70b processing
 - AI outputs: executive summary, action items (persistent checkboxes), mind map
 - Thai/English language toggle per recording (defaults to Thai 🇹🇭)
@@ -16,7 +16,11 @@ All notable changes to Distill are documented here.
 - Custom prompt template editor with 5 built-in templates
 - SAP Horizon design system — fully responsive with mobile bottom nav + top bar
 - Dark mode support (Evening Horizon palette)
-- Server-side API proxy routes — keys never exposed in the client bundle
+- Server-side API proxy routes for web — keys never exposed in the client bundle
 - Dexie.js IndexedDB storage — fully local, zero server cost
+- **Android APK via Capacitor** — distributable APK, no server or auth needed
+- Wake Lock keeps screen on during recording
+- `@capacitor/preferences` secure storage for API keys on native
 - Podman/Docker multi-stage Containerfile + `compose.yaml`
 - MIT License — free and open source
+- GitHub Actions CI/CD: APK + GHCR image built and attached on every release tag
